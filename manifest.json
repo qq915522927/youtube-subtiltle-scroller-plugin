@@ -1,0 +1,21 @@
+{
+    "manifest_version": 2,
+    "name": "Subtitle navigation",
+    "version": "0.1.4",
+    "description": "TBD",
+    "permissions": [
+      "webRequest",
+      "tabs",
+      "<all_urls>"
+    ],
+    "background": {
+        "scripts": ["./dist/background.js"],
+        "persistent": true
+      },
+      "content_scripts": [
+        {
+          "matches": ["<all_urls>"],
+          "js": ["./dist/foreground.js"]
+        }
+      ]
+  }
