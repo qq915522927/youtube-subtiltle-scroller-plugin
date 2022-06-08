@@ -4,18 +4,19 @@
     "version": "0.1.4",
     "description": "TBD",
     "permissions": [
+      "https://*.youtube.com/*",
       "webRequest",
-      "tabs",
-      "<all_urls>"
+      "webRequestBlocking",
+      "tabs"
     ],
     "background": {
         "scripts": ["./dist/background.js"],
         "persistent": true
       },
-      "content_scripts": [
-        {
-          "matches": ["<all_urls>"],
-          "js": ["./dist/foreground.js"]
-        }
-      ]
-  }
+    "content_scripts": [
+      {
+        "matches": ["https://*.youtube.com/*"],
+        "js": ["./dist/foreground.js"]
+      }
+    ]
+}

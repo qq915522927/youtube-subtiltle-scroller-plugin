@@ -1,6 +1,9 @@
 import { parse, subTitleType } from 'subtitle'
 import "./css/style.css"
+import UI from './ui';
 
+
+const VideoSelector = '.html5-video-player'
 
 function patchXMLRequest() {
 	((open) => {
@@ -24,23 +27,27 @@ function patchXMLRequest() {
 
 function injectScript(): void {
     window.titleNavigationInjected = true;
-	const sc = document.createElement("script");
+    const sc = document.createElement("script");
 	sc.innerHTML = `(${patchXMLRequest.toString()})()`;
 	document.head.appendChild(sc);
 	document.head.removeChild(sc);
     window.addEventListener('subtitle_fetch', processSubData as EventListener)
 }
 
+// chrome.webRequest.onCompleted.addListener((details) => {
+//     console.log(details.url);
+// },  {urls: ["<all_urls>"]},)
+
 async function processSubData(event: CustomEvent) {
     console.log(event.detail);
     const urlObject: URL = new URL(event.detail)
     urlObject.searchParams.set('fmt', 'vtt')
-    createUI();
     const resp = await fetch(urlObject.href)
     const text = await resp.text()
     console.log(text)
     let subs  = parse(text)
-    showSubs(subs)
+    createUI(subs);
+    // showSubs(subs)
 }
 
 function showSubs(subs: subTitleType[] ) {
@@ -62,11 +69,7 @@ if (!window.titleNavigationInjected) {
     }
 }
 
-function createUI() {
-    let container = document.createElement("div")
-    container.classList.add("subtitle-nav");
-    container.innerHTML = `
-    <button id="subtitle-open-btn">打开全部字幕</button>
-    `
-    document.body.appendChild(container);
+
+function createUI(subs: subTitleType[]) {
+    UI.renderSubs("body", subs);
 }

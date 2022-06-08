@@ -1,0 +1,19 @@
+import ReactDOM from 'react-dom'
+import React from 'react'
+import SubTitles from './components/subtitles';
+import { subTitleType } from 'subtitle'
+
+const e = React.createElement;
+
+class UI {
+  public static renderSubs(playerContainerElementSelector: string, subs: subTitleType[]) {
+    const playerContainerElement = document.querySelector(playerContainerElementSelector)
+    const subsContainerElement = document.createElement('div')
+    subsContainerElement.id = 'subtitle-navigation'
+    playerContainerElement?.appendChild(subsContainerElement)
+    ReactDOM.render(e(SubTitles, {subs: subs}) , document.querySelector('#subtitle-navigation'));
+  }
+
+}
+
+export default UI

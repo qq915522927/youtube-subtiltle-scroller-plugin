@@ -11,3 +11,21 @@
 // chrome.tabs.onUpdated.addListener(function (tab) {
 //         console.log("onUpdated");
 // });
+
+
+chrome.webRequest.onCompleted.addListener(details => {
+    console.log(details.url)
+},
+// {urls: ["https://*.youtube.com/*"]}
+    {urls: ["https://www.youtube.com/*"]},
+)
+
+ fetch("https://www.youtube.com/watch?v=fIV6P1W-wuo").then(
+     (resp) => {
+         console.log("Get response")
+     }
+ )
+
+console.log("background")
+
+setInterval(()=> {console.log("hello")}, 1000)
