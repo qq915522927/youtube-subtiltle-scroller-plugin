@@ -4,6 +4,7 @@ module.exports = {
 	entry: {
 		background: "./src/background.ts",
 		foreground: "./src/foreground.ts",
+		ui_test: "./src/ui_test.ts",
 	},
 	output: {
 		filename: "[name].js",
@@ -24,6 +25,15 @@ module.exports = {
 		],
 	},
 	devtool: "source-map",
+	devServer: {
+		static: {
+		  directory: path.join(__dirname, ''),
+		},
+		compress: true,
+		port: 9000,
+		liveReload: true,
+		open: true
+	  },
 
 	resolve: {
 		extensions: [".ts", ".tsx", ".js", ".json"],

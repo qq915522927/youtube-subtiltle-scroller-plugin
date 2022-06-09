@@ -2,6 +2,9 @@ import ReactDOM from 'react-dom'
 import React from 'react'
 import SubTitles from './components/subtitles';
 import { subTitleType } from 'subtitle'
+import "./css/style.css"
+import 'bootstrap/dist/css/bootstrap.css';
+import "bootstrap"
 
 const e = React.createElement;
 

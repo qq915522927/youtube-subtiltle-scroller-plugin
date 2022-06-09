@@ -2,17 +2,15 @@
     position: fixed;
     top: 50%;
     right: 10px;
+    width: 500px;
     z-index: 100;
 }
 .subtitle-nav {
-    height: 50px;
-    width: 100px;
     color: white;
     background-color: red;
 }
 .subtitle-container {
     height: 500px;
-    width: 300px;
     overflow: auto;
     background-color: black;
     color: white;
