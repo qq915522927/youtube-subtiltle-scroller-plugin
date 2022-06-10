@@ -12,7 +12,7 @@ export type subTitle = {
 
 type SubsState = {
 	subs: subTitle[];
-	stopScroll: boolean;
+	autoScroll: boolean;
 };
 
 class SubTitles extends React.Component<{}> {
@@ -34,7 +34,7 @@ class SubTitles extends React.Component<{}> {
 	}
 	state: SubsState = {
 		subs: [],
-		stopScroll: false,
+		autoScroll: true,
 	};
 
 	getInitialSubs(subs: subTitleType[]) {
@@ -58,6 +58,8 @@ class SubTitles extends React.Component<{}> {
 	}
 
 	selectRow(sub: subTitle) {
+    let selection = window.getSelection();
+    if(selection.toString().length !== 0) return; // if this is a selection, don't move to the target sub
 		this.highlightRow(sub);
 		this.moveToSub(sub);
 	}
@@ -99,33 +101,39 @@ class SubTitles extends React.Component<{}> {
 			return;
 		}
 		let sub = getCurrentFirstSub(this.state.subs, ctime);
-		this.highlightRow(sub);
-		this.scrollToSub(sub);
+    this.highlightRow(sub);
+    if (this.state.autoScroll) {
+      this.scrollToSub(sub);
+    }
 	}
 
 	componentDidMount() {
 		setInterval(() => this.updateSubtitleBoard(), 300);
-    window.addEventListener("subtitle_updated", (e: CustomEvent) => this.onSubTitleUpdated(e));
-    this.videoElement.addEventListener('loadstart', (e) => this.reset() );
-  }
-  
-  reset() {
-    this.setState({
-      subs: []
-    })
-  }
+		window.addEventListener("subtitle_updated", (e: CustomEvent) =>
+			this.onSubTitleUpdated(e)
+    );
+    if (this.videoElement) {
+      this.videoElement.addEventListener("loadstart", (e) => this.reset());
+    }
+	}
+
+	reset() {
+		this.setState({
+			subs: [],
+		});
+	}
 
 	onSubTitleUpdated(event: CustomEvent) {
-    console.log("receive msg")
+		console.log("receive msg");
 		let subs: subTitle[] = this.getInitialSubs(event.detail);
-    console.log(subs)
+		console.log(subs);
 		this.setState({
 			subs: subs,
 		});
 	}
 
 	render() {
-    console.log(this.state.subs.length)
+		console.log(this.state.subs.length);
 		if (this.state.subs.length == 0) {
 			return <div></div>;
 		} else
@@ -144,7 +152,25 @@ class SubTitles extends React.Component<{}> {
 									折叠
 								</a>
 							</li>
+
+							<div className="form-check form-switch">
+								<input
+									className="form-check-input"
+									type="checkbox"
+                  role="switch"
+                  checked={this.state.autoScroll}
+                  onChange={(e) => this.onAutoScrollToggle(e) }
+									id="flexSwitchCheckDefault"
+								/>
+								<label
+									className="form-check-label"
+									htmlFor="flexSwitchCheckDefault"
+								>
+									Auto scrolling
+								</label>
+							</div>
 						</ul>
+
 						<div
 							id="subtitle-container"
 							className="subtitle-container container-fluid collapse show"
@@ -176,7 +202,13 @@ class SubTitles extends React.Component<{}> {
 					</div>
 				</Draggable>
 			);
-	}
+  }
+
+  onAutoScrollToggle(e: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      autoScroll: e.target.checked
+    })
+  }
 }
 
 export default SubTitles;
