@@ -9,4 +9,9 @@ let subs: subTitleType[] = [
 
 ]
 
-UI.renderSubs("body", subs);
+UI.renderSubs("body");
+    window.dispatchEvent(new CustomEvent('subtitle_updated', { detail: subs}))
+
+setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('subtitle_updated', { detail: subs}))
+}, 1);

@@ -9,12 +9,12 @@ import "bootstrap"
 const e = React.createElement;
 
 class UI {
-  public static renderSubs(playerContainerElementSelector: string, subs: subTitleType[]) {
+  public static renderSubs(playerContainerElementSelector: string) {
     const playerContainerElement = document.querySelector(playerContainerElementSelector)
     const subsContainerElement = document.createElement('div')
     subsContainerElement.id = 'subtitle-navigation'
     playerContainerElement?.appendChild(subsContainerElement)
-    ReactDOM.render(e(SubTitles, {subs: subs}) , document.querySelector('#subtitle-navigation'));
+    ReactDOM.render(e(SubTitles) , document.querySelector('#subtitle-navigation'));
   }
 
 }

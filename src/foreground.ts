@@ -12,12 +12,8 @@ function patchXMLRequest() {
 			if (url.match(/^http/g) !== null) {
 				const urlObject = new URL(url);
 				if (urlObject.pathname === "/api/timedtext") {
-                    if (!window.subTitleInit) {
-                        window.subtitleUrl = urlObject.href;
-                        window.dispatchEvent(new CustomEvent('subtitle_fetch', { detail: urlObject.href }))
-                        window.subTitleInit = true;
-                    }
-					console.log("正在获取字幕");
+                    window.dispatchEvent(new CustomEvent('subtitle_fetch', { detail: urlObject.href }))
+					console.log("监听到获取字幕的请求");
 				}
 			}
 			open.call(this, method, url, true);
@@ -44,32 +40,19 @@ async function processSubData(event: CustomEvent) {
     urlObject.searchParams.set('fmt', 'vtt')
     const resp = await fetch(urlObject.href)
     const text = await resp.text()
-    console.log(text)
+    console.log("fetching subtitle")
     let subs  = parse(text)
-    createUI(subs);
-    // showSubs(subs)
+    window.dispatchEvent(new CustomEvent('subtitle_updated', { detail: subs}))
 }
-
-function showSubs(subs: subTitleType[] ) {
-    let container = document.createElement("div")
-    container.classList.add("subtitle-container");
-    let html = ""
-    for(let sub of subs) {
-        html += `<p class="subtitle-nav-row">${sub.start} - ${sub.end}: ${sub.text} </p>`
-    }
-    container.innerHTML = html
-    document.body.appendChild(container);
-}
-
-
 
 if (!window.titleNavigationInjected) {
     if (window.location.host === 'www.youtube.com') {
         injectScript();
+        createUI();
     }
 }
 
 
-function createUI(subs: subTitleType[]) {
-    UI.renderSubs("body", subs);
+function createUI() {
+    UI.renderSubs("body");
 }
