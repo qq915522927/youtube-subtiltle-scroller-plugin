@@ -1,17 +1,28 @@
 .subtitle-box {
-    position: fixed;
+    position: fixed !important;
     top: 50%;
     right: 10px;
     width: 500px;
     z-index: 100;
+    font-size: 19px;
+    background-color: rgba(50, 50, 50,1) !important;
 }
 .subtitle-nav {
-    color: white;
-    background-color: red;
+    border-bottom: 1px groove #FFFFFF;
+    cursor: grab;
+    background: transparent;
 }
 .subtitle-container {
     height: 500px;
     overflow: auto;
-    background-color: black;
     color: white;
+    background: transparent;
+}
+
+.subtitle-row {
+    cursor: pointer;
+}
+
+.higlight-row {
+    background-color: rgba(0, 0, 0, 0.71);
 }
