@@ -20,7 +20,10 @@ type SubsState = {
 
 class SubTitles extends React.Component<{}> {
 	videoElement = document.querySelector("video");
-	rowRefs: { [index: number]: HTMLElement } = {};
+  rowRefs: { [index: number]: HTMLElement } = {};
+  
+
+  mouseEnter = false;
 
 	constructor(props) {
 		super(props);
@@ -167,6 +170,12 @@ class SubTitles extends React.Component<{}> {
 
   }
 
+  disableAutoScroll() {
+    this.setState(
+      {autoScroll: false}
+    )
+  }
+
   toggleFold(event) {
     event.preventDefault();
     this.setState(
@@ -220,7 +229,10 @@ class SubTitles extends React.Component<{}> {
 
 						<div
 							id="subtitle-container"
-							className="subtitle-container container-fluid collapse show"
+              className="subtitle-container container-fluid collapse show"
+              onWheel={() => this.disableAutoScroll()}
+              // onMouseEnter={() => this.mouseEnter = true}
+              // onMouseLeave={() => this.mouseEnter = false}
 						>
 							{this.state.subs.map((sub, index) => {
 								return (
