@@ -60,8 +60,8 @@ function createUI() {
 
 function importBootsfont() {
 	let style: HTMLStyleElement = document.createElement("style");
-	let font1Url = chrome.runtime.getURL(`dist/fonts/bootstrap-icons.woff`);
-	let font2Url = chrome.runtime.getURL(`dist/fonts/bootstrap-icons.woff2`);
+	let font1Url = chrome.runtime.getURL(`bootstrap-icons.woff`);
+	let font2Url = chrome.runtime.getURL(`bootstrap-icons.woff2`);
 	var font1 = new FontFace("bootstrap-icons", `url(${font1Url})`);
 	// var font2 = new FontFace('Junction Regular', `url(${font1Url})`);
 	console.log(font1);

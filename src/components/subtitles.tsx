@@ -120,7 +120,10 @@ class SubTitles extends React.Component<{}> {
 	}
 
 	updateSubtitleBoard() {
-		if (!this.videoElement) return;
+		if (!this.videoElement) {
+      this.videoElement = document.querySelector("video");
+      if (!this.videoElement) return;
+    }
 
 		let ctime = getCurrentTime(this.videoElement);
 		if (this.state.subs.length === 0) {

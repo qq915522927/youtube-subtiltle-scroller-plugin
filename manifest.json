@@ -1,27 +1,26 @@
 {
-    "manifest_version": 2,
-    "name": "Subtitle navigation",
-    "version": "0.1.4",
-    "description": "TBD",
-    "permissions": [
-      "https://*.youtube.com/*",
-      "webRequest",
-      "webRequestBlocking",
-      "tabs",
-      "runtime"
-    ],
-    "background": {
-        "scripts": ["./dist/background.js"],
-        "persistent": true
-      },
-    "content_scripts": [
-      {
-        "matches": ["https://*.youtube.com/*"],
-        "js": ["./dist/foreground.js"]
-      }
-    ],
-    "web_accessible_resources": [
-      "dist/fonts/bootstrap-icons.woff",
-      "dist/fonts/bootstrap-icons.woff2"
-      ]
+	"manifest_version": 2,
+	"name": "Youtube Subtitle Navigation",
+	"version": "0.0.0.1",
+	"description": "To help to navigate the video via subtitles",
+	"icons": {
+		"32": "icons/logo32.png",
+		"128": "icons/logo128.png",
+		"512": "icons/logo512.png"
+	},
+	"permissions": ["https://*.youtube.com/*", "tabs", "runtime"],
+	"background": {
+		"scripts": ["./background.js"],
+		"persistent": false
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://*.youtube.com/*"],
+			"js": ["./foreground.js"]
+		}
+	],
+	"web_accessible_resources": ["bootstrap-icons.woff", "bootstrap-icons.woff2"],
+	"browser_action": {
+		"default_icon": "icons/logo128.png"
+	}
 }

@@ -1,6 +1,7 @@
 const path = require("path");
+const CopyPlugin = require("copy-webpack-plugin");
 
-module.exports = {
+module.exports = (env) =>({
 	entry: {
 		background: "./src/background.ts",
 		foreground: "./src/foreground.ts",
@@ -12,6 +13,15 @@ module.exports = {
 		path: path.resolve(__dirname, "dist"),
 		publicPath: '',
 	},
+
+	plugins: [
+		new CopyPlugin({
+			patterns: [
+			  { from: "./manifest.json", to: "." },
+			  { from: "icons", to: "icons" },
+			]
+		  }),
+	],
 	module: {
 		rules: [
 			{
@@ -50,5 +60,5 @@ module.exports = {
 	resolve: {
 		extensions: [".ts", ".tsx", ".js", ".json"],
   },
-  mode: "development"
-};
+  mode: env.production ? "production" : "development",
+})
