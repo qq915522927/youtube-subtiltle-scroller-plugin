@@ -1,7 +1,7 @@
 import * as React from "react";
 import Draggable from "react-draggable";
 import { subTitleType } from "subtitle";
-import { getCleanSubText, getCurrentFirstSub } from "../utils/subsHelper";
+import { getCleanSubText, getCurrentFirstSub, mergeSubs } from "../utils/subsHelper";
 import { moveToTime, getCurrentTime } from "../utils/videoHelpers";
 import { scroller, Element } from "react-scroll";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -42,7 +42,9 @@ class SubTitles extends React.Component<{}> {
 	};
 
 	getInitialSubs(subs: subTitleType[]) {
-		return this.normalizeInputSubs(subs).map((sub, index) => {
+    subs = this.normalizeInputSubs(subs);
+    subs = mergeSubs(subs)
+		return subs.map((sub, index) => {
 			return {
 				id: index,
 				subInfo: sub,
@@ -131,7 +133,6 @@ class SubTitles extends React.Component<{}> {
 	onSubTitleUpdated(event: CustomEvent) {
 		console.log("receive msg");
 		let subs: subTitle[] = this.getInitialSubs(event.detail);
-		console.log(subs);
 		this.setState({
 			subs: subs,
 		});
@@ -174,7 +175,6 @@ class SubTitles extends React.Component<{}> {
   }
 
 	render() {
-		console.log(this.state.subs.length);
 		if (this.state.subs.length == 0) {
 			return <div></div>;
 		} else
@@ -239,7 +239,7 @@ class SubTitles extends React.Component<{}> {
 											key={index}
 										>
 											<Element name={`subtitleRow${sub.id}`}>
-												{sub.subInfo.text}
+												{sub.subInfo.text.length !==0? sub.subInfo.text: '-'}
 											</Element>
 										</div>
 									</div>
