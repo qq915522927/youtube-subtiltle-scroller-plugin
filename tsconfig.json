@@ -10,7 +10,7 @@
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "baseUrl": "./",
-        "jsx": "react-jsx"
+        "jsx": "react"
     },
     "include": [
       "src/**/*"

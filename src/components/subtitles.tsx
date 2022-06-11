@@ -1,6 +1,8 @@
 import * as React from "react";
+import { parse, subTitleType } from "subtitle";
 import Draggable from "react-draggable";
-import { subTitleType } from "subtitle";
+import { ClientYoutube } from "../utils/clientYoutube";
+import { VideoInformationResponseParser } from "../utils/videoInfoParser";
 import {
 	getCleanSubText,
 	getCurrentFirstSub,
@@ -10,17 +12,25 @@ import { moveToTime, getCurrentTime } from "../utils/videoHelpers";
 import { scroller, Element } from "react-scroll";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
+
 export type subTitle = {
 	id: number;
 	highlighted: Boolean;
 	subInfo: subTitleType;
 };
+import { CaptionTrack } from "../types/captionTrack";
 
 type SubsState = {
 	subs: subTitle[];
 	autoScroll: boolean;
-	unfolded: true;
+	unfolded: boolean;
+	videoInfo: VideoInfo;
 };
+interface VideoInfo {
+	tracks: CaptionTrack[];
+	videoId: string;
+	videoTitle: string;
+}
 
 class SubTitles extends React.Component<{}> {
 	videoElement = document.querySelector("video");
@@ -44,7 +54,8 @@ class SubTitles extends React.Component<{}> {
 	state: SubsState = {
 		subs: [],
 		autoScroll: true,
-		unfolded: true,
+		unfolded: false,
+		videoInfo: null,
 	};
 
 	getInitialSubs(subs: subTitleType[]) {
@@ -79,11 +90,11 @@ class SubTitles extends React.Component<{}> {
 		} // only capture single click
 		this.singleClick = true;
 		let selection = window.getSelection();
-    if (selection.toString().length !== 0) return; // if this is a selection, don't move to the target sub
+		if (selection.toString().length !== 0) return; // if this is a selection, don't move to the target sub
 		setTimeout(() => {
-      console.log("Time reached")
+			console.log("Time reached");
 			if (this.singleClick) {
-        console.log("single click")
+				console.log("single click");
 				this.highlightRow(sub);
 				this.moveToSub(sub);
 			}
@@ -121,9 +132,9 @@ class SubTitles extends React.Component<{}> {
 
 	updateSubtitleBoard() {
 		if (!this.videoElement) {
-      this.videoElement = document.querySelector("video");
-      if (!this.videoElement) return;
-    }
+			this.videoElement = document.querySelector("video");
+			if (!this.videoElement) return;
+		}
 
 		let ctime = getCurrentTime(this.videoElement);
 		if (this.state.subs.length === 0) {
@@ -138,13 +149,45 @@ class SubTitles extends React.Component<{}> {
 	}
 
 	componentDidMount() {
+		getSubTitleTracks();
 		setInterval(() => this.updateSubtitleBoard(), 300);
+		window.addEventListener("subtitleTracksFetch", (e: CustomEvent) =>
+			this.onCaptionTrackUpdated(e)
+		);
 		window.addEventListener("subtitle_updated", (e: CustomEvent) =>
 			this.onSubTitleUpdated(e)
 		);
+		console.log("mounted");
+
 		if (this.videoElement) {
-			this.videoElement.addEventListener("loadstart", (e) => this.reset());
+			console.log("event register");
+			this.videoElement.addEventListener("loadstart", (e) => {
+				this.reset();
+				getSubTitleTracks();
+			});
 		}
+	}
+	onSelectCaption(e, track: CaptionTrack) {
+		e.preventDefault();
+		this.getSubtitle(track).then(() => {
+			this.setState({
+				unfolded: true,
+			});
+		});
+	}
+
+	getSubtitle(track: CaptionTrack) {
+		const client = new ClientYoutube();
+		let urlObj = new URL(track.baseUrl);
+		urlObj.searchParams.append("fmt", "vtt");
+		return client
+			.getSubtitle(urlObj.href)
+			.then((response: string) => {
+				processSubData(response);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
 	}
 
 	reset() {
@@ -160,12 +203,23 @@ class SubTitles extends React.Component<{}> {
 			subs: subs,
 		});
 	}
+	onCaptionTrackUpdated(event: CustomEvent) {
+		console.log("set video info");
+		this.setState({
+			videoInfo: event.detail,
+		});
+		console.log(this.state);
+	}
 
 	renderTooltip1(props) {
 		return <Tooltip {...props}>Fold/Unfold</Tooltip>;
 	}
 	renderTooltip2(props) {
 		return <Tooltip {...props}>Auto scrolling</Tooltip>;
+	}
+	renderTooltip3(props) {
+		// No subtitles
+		return <Tooltip {...props}>Select a caption</Tooltip>;
 	}
 
 	getFoldIcon() {
@@ -193,13 +247,32 @@ class SubTitles extends React.Component<{}> {
 	}
 
 	render() {
-		if (this.state.subs.length == 0) {
+		const videoId = new URL(document.URL).searchParams.get("v");
+		if (!this.state.videoInfo || !videoId) {
 			return <div></div>;
 		} else
 			return (
 				<Draggable handle="#handle">
 					<div className="subtitle-box card">
 						<ul id="handle" className="nav subtitle-nav text-white">
+							{this.getSubsDropDown()}
+
+							<li className="nav-item">
+								<OverlayTrigger
+									placement="top"
+									delay={{ show: 250, hide: 400 }}
+									overlay={this.renderTooltip2}
+								>
+									<a
+										className="btn text-white"
+										onClick={(event) => this.onAutoScrollToggle(event)}
+										href="#"
+									>
+										{this.getAutoScrollIcon()}
+									</a>
+								</OverlayTrigger>
+							</li>
+
 							<li className="nav-item">
 								<OverlayTrigger
 									placement="top"
@@ -218,27 +291,14 @@ class SubTitles extends React.Component<{}> {
 									</a>
 								</OverlayTrigger>
 							</li>
-
-							<li className="nav-item">
-								<OverlayTrigger
-									placement="top"
-									delay={{ show: 250, hide: 400 }}
-									overlay={this.renderTooltip2}
-								>
-									<a
-										className="btn text-white"
-										onClick={(event) => this.onAutoScrollToggle(event)}
-										href="#"
-									>
-										{this.getAutoScrollIcon()}
-									</a>
-								</OverlayTrigger>
-							</li>
 						</ul>
 
 						<div
 							id="subtitle-container"
-							className="subtitle-container container-fluid collapse show"
+							className={
+								"subtitle-container container-fluid collapse" +
+								(this.state.unfolded ? " show" : "")
+							}
 							onWheel={() => this.disableAutoScroll()}
 							// onMouseEnter={() => this.mouseEnter = true}
 							// onMouseLeave={() => this.mouseEnter = false}
@@ -278,6 +338,96 @@ class SubTitles extends React.Component<{}> {
 			autoScroll: !this.state.autoScroll,
 		});
 	}
+
+	getSubsDropDown() {
+		if (!this.state.videoInfo) return;
+		if (!this.state.videoInfo.tracks) {
+			return (
+				<li className="nav-item">
+					<a className="nav-link disabled" role="button">
+						<i className="bi bi-badge-cc"></i>
+					</a>
+				</li>
+			);
+		}
+		return (
+			<li className="nav-item dropdown">
+				<OverlayTrigger
+					placement="top"
+					delay={{ show: 250, hide: 400 }}
+					overlay={this.renderTooltip3}
+				>
+					<a
+						className="nav-link dropdown-toggle"
+						href="#"
+						id="ccDarkDropdownMenuLink"
+						role="button"
+						data-bs-toggle="dropdown"
+						aria-expanded="false"
+					>
+						<i className="bi bi-badge-cc"></i>
+					</a>
+				</OverlayTrigger>
+				<ul
+					className="dropdown-menu dropdown-menu-dark"
+					aria-labelledby="navbarDarkDropdownMenuLink"
+				>
+					{this.state.videoInfo.tracks.map((track, i) => {
+						return (
+							<li key={i}>
+								<a
+									className="dropdown-item"
+									onClick={(e) => this.onSelectCaption(e, track)}
+									href="#"
+								>
+									{track.name.simpleText}
+								</a>
+							</li>
+						);
+					})}
+				</ul>
+			</li>
+		);
+	}
 }
 
 export default SubTitles;
+
+const getSubTitleTracks = () => {
+	const videoId = new URL(document.URL).searchParams.get("v");
+	const client = new ClientYoutube();
+	client
+		.getVideoInformation(videoId)
+		.then((response) => {
+			const captionTrackList = VideoInformationResponseParser.parse(response);
+			let videoInfo: VideoInfo = {
+				tracks: captionTrackList,
+				videoId,
+				videoTitle: getVideoTitle(),
+			};
+			window.dispatchEvent(
+				new CustomEvent("subtitleTracksFetch", { detail: videoInfo })
+			);
+		})
+		.catch((error: Error) => {
+			let videoInfo: VideoInfo = {
+				tracks: null,
+				videoId,
+				videoTitle: getVideoTitle(),
+				//TODO, add error message
+			};
+			window.dispatchEvent(
+				new CustomEvent("subtitleTracksFetch", { detail: videoInfo })
+			);
+		});
+	return true;
+};
+
+const getVideoTitle = (): string => {
+	return document.title.replace(/[+|/?^.<>":]/g, "").replace(/ - YouTube/, "");
+};
+
+function processSubData(text: string) {
+	let subs = parse(text);
+	window.dispatchEvent(new CustomEvent("subtitle_updated", { detail: subs }));
+}
