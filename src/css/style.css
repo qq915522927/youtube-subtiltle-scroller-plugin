@@ -3,7 +3,7 @@
     top: 50%;
     right: 10px;
     width: 500px;
-    z-index: 100;
+    z-index: 999;
     font-size: 19px;
     background-color: rgba(50, 50, 50,1) !important;
 }

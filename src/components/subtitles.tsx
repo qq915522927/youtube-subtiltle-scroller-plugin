@@ -1,7 +1,11 @@
 import * as React from "react";
 import Draggable from "react-draggable";
 import { subTitleType } from "subtitle";
-import { getCleanSubText, getCurrentFirstSub, mergeSubs } from "../utils/subsHelper";
+import {
+	getCleanSubText,
+	getCurrentFirstSub,
+	mergeSubs,
+} from "../utils/subsHelper";
 import { moveToTime, getCurrentTime } from "../utils/videoHelpers";
 import { scroller, Element } from "react-scroll";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -14,16 +18,15 @@ export type subTitle = {
 
 type SubsState = {
 	subs: subTitle[];
-  autoScroll: boolean;
-  unfolded: true
+	autoScroll: boolean;
+	unfolded: true;
 };
 
 class SubTitles extends React.Component<{}> {
 	videoElement = document.querySelector("video");
-  rowRefs: { [index: number]: HTMLElement } = {};
-  
+	rowRefs: { [index: number]: HTMLElement } = {};
 
-  mouseEnter = false;
+	mouseEnter = false;
 
 	constructor(props) {
 		super(props);
@@ -40,13 +43,13 @@ class SubTitles extends React.Component<{}> {
 	}
 	state: SubsState = {
 		subs: [],
-    autoScroll: true,
-    unfolded: true
+		autoScroll: true,
+		unfolded: true,
 	};
 
 	getInitialSubs(subs: subTitleType[]) {
-    subs = this.normalizeInputSubs(subs);
-    subs = mergeSubs(subs)
+		subs = this.normalizeInputSubs(subs);
+		subs = mergeSubs(subs);
 		return subs.map((sub, index) => {
 			return {
 				id: index,
@@ -66,11 +69,25 @@ class SubTitles extends React.Component<{}> {
 		});
 	}
 
-	selectRow(sub: subTitle) {
+	singleClick = true;
+
+	selectRow(e, sub: subTitle) {
+		console.log(e.detail);
+		if (e.detail !== 1) {
+			this.singleClick = false;
+			return;
+		} // only capture single click
+		this.singleClick = true;
 		let selection = window.getSelection();
-		if (selection.toString().length !== 0) return; // if this is a selection, don't move to the target sub
-		this.highlightRow(sub);
-		this.moveToSub(sub);
+    if (selection.toString().length !== 0) return; // if this is a selection, don't move to the target sub
+		setTimeout(() => {
+      console.log("Time reached")
+			if (this.singleClick) {
+        console.log("single click")
+				this.highlightRow(sub);
+				this.moveToSub(sub);
+			}
+		}, 200);
 	}
 	scrollToSub(sub: subTitle) {
 		scroller.scrollTo(`subtitleRow${sub.id}`, {
@@ -146,42 +163,31 @@ class SubTitles extends React.Component<{}> {
 	}
 	renderTooltip2(props) {
 		return <Tooltip {...props}>Auto scrolling</Tooltip>;
-  }
-  
+	}
 
-  getFoldIcon() {
-    if (this.state.unfolded) {
-    return <i className="bi bi-fullscreen-exit"></i>
-    }
+	getFoldIcon() {
+		if (this.state.unfolded) {
+			return <i className="bi bi-fullscreen-exit"></i>;
+		} else {
+			return <i className="bi bi-fullscreen"></i>;
+		}
+	}
+	getAutoScrollIcon() {
+		if (this.state.autoScroll) {
+			return <i className="bi bi-toggle-on"></i>;
+		} else {
+			return <i className="bi bi-toggle-off"></i>;
+		}
+	}
 
-    else {
-      return <i className="bi bi-fullscreen"></i>
-    }
+	disableAutoScroll() {
+		this.setState({ autoScroll: false });
+	}
 
-  }
-  getAutoScrollIcon() {
-    if (this.state.autoScroll) {
-    return <i className="bi bi-toggle-on"></i>
-    }
-
-    else {
-      return <i className="bi bi-toggle-off"></i>
-    }
-
-  }
-
-  disableAutoScroll() {
-    this.setState(
-      {autoScroll: false}
-    )
-  }
-
-  toggleFold(event) {
-    event.preventDefault();
-    this.setState(
-      {unfolded: !this.state.unfolded}
-    )
-  }
+	toggleFold(event) {
+		event.preventDefault();
+		this.setState({ unfolded: !this.state.unfolded });
+	}
 
 	render() {
 		if (this.state.subs.length == 0) {
@@ -201,38 +207,38 @@ class SubTitles extends React.Component<{}> {
 										className="btn text-white"
 										data-bs-toggle="collapse"
 										data-bs-target="#subtitle-container"
-                    aria-expanded="false"
-                    onClick={(event) => this.toggleFold(event)}
+										aria-expanded="false"
+										onClick={(event) => this.toggleFold(event)}
 										href="#"
 									>
-									{this.getFoldIcon()}
+										{this.getFoldIcon()}
 									</a>
 								</OverlayTrigger>
 							</li>
 
 							<li className="nav-item">
-									<OverlayTrigger
-										placement="top"
-										delay={{ show: 250, hide: 400 }}
-										overlay={this.renderTooltip2}
-									>
+								<OverlayTrigger
+									placement="top"
+									delay={{ show: 250, hide: 400 }}
+									overlay={this.renderTooltip2}
+								>
 									<a
 										className="btn text-white"
-                    onClick={(event) => this.onAutoScrollToggle(event)}
+										onClick={(event) => this.onAutoScrollToggle(event)}
 										href="#"
 									>
-									{this.getAutoScrollIcon()}
+										{this.getAutoScrollIcon()}
 									</a>
-									</OverlayTrigger>
+								</OverlayTrigger>
 							</li>
 						</ul>
 
 						<div
 							id="subtitle-container"
-              className="subtitle-container container-fluid collapse show"
-              onWheel={() => this.disableAutoScroll()}
-              // onMouseEnter={() => this.mouseEnter = true}
-              // onMouseLeave={() => this.mouseEnter = false}
+							className="subtitle-container container-fluid collapse show"
+							onWheel={() => this.disableAutoScroll()}
+							// onMouseEnter={() => this.mouseEnter = true}
+							// onMouseLeave={() => this.mouseEnter = false}
 						>
 							{this.state.subs.map((sub, index) => {
 								return (
@@ -242,7 +248,7 @@ class SubTitles extends React.Component<{}> {
 										ref={(div) => {
 											this.rowRefs[index] = div;
 										}}
-										onClick={() => this.selectRow(sub)}
+										onClick={(e) => this.selectRow(e, sub)}
 									>
 										<div
 											className={
@@ -251,7 +257,7 @@ class SubTitles extends React.Component<{}> {
 											key={index}
 										>
 											<Element name={`subtitleRow${sub.id}`}>
-												{sub.subInfo.text.length !==0? sub.subInfo.text: '-'}
+												{sub.subInfo.text.length !== 0 ? sub.subInfo.text : "-"}
 											</Element>
 										</div>
 									</div>
@@ -264,7 +270,7 @@ class SubTitles extends React.Component<{}> {
 	}
 
 	onAutoScrollToggle(event) {
-    event.preventDefault();
+		event.preventDefault();
 		this.setState({
 			autoScroll: !this.state.autoScroll,
 		});
