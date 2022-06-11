@@ -4,6 +4,8 @@ import { subTitleType } from "subtitle";
 import { getCleanSubText, getCurrentFirstSub } from "../utils/subsHelper";
 import { moveToTime, getCurrentTime } from "../utils/videoHelpers";
 import { scroller, Element } from "react-scroll";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
 export type subTitle = {
 	id: number;
 	highlighted: Boolean;
@@ -12,7 +14,8 @@ export type subTitle = {
 
 type SubsState = {
 	subs: subTitle[];
-	autoScroll: boolean;
+  autoScroll: boolean;
+  unfolded: true
 };
 
 class SubTitles extends React.Component<{}> {
@@ -34,7 +37,8 @@ class SubTitles extends React.Component<{}> {
 	}
 	state: SubsState = {
 		subs: [],
-		autoScroll: true,
+    autoScroll: true,
+    unfolded: true
 	};
 
 	getInitialSubs(subs: subTitleType[]) {
@@ -58,8 +62,8 @@ class SubTitles extends React.Component<{}> {
 	}
 
 	selectRow(sub: subTitle) {
-    let selection = window.getSelection();
-    if(selection.toString().length !== 0) return; // if this is a selection, don't move to the target sub
+		let selection = window.getSelection();
+		if (selection.toString().length !== 0) return; // if this is a selection, don't move to the target sub
 		this.highlightRow(sub);
 		this.moveToSub(sub);
 	}
@@ -101,20 +105,21 @@ class SubTitles extends React.Component<{}> {
 			return;
 		}
 		let sub = getCurrentFirstSub(this.state.subs, ctime);
-    this.highlightRow(sub);
-    if (this.state.autoScroll) {
-      this.scrollToSub(sub);
-    }
+		if (!sub) return;
+		this.highlightRow(sub);
+		if (this.state.autoScroll) {
+			this.scrollToSub(sub);
+		}
 	}
 
 	componentDidMount() {
 		setInterval(() => this.updateSubtitleBoard(), 300);
 		window.addEventListener("subtitle_updated", (e: CustomEvent) =>
 			this.onSubTitleUpdated(e)
-    );
-    if (this.videoElement) {
-      this.videoElement.addEventListener("loadstart", (e) => this.reset());
-    }
+		);
+		if (this.videoElement) {
+			this.videoElement.addEventListener("loadstart", (e) => this.reset());
+		}
 	}
 
 	reset() {
@@ -132,6 +137,42 @@ class SubTitles extends React.Component<{}> {
 		});
 	}
 
+	renderTooltip1(props) {
+		return <Tooltip {...props}>Fold/Unfold</Tooltip>;
+	}
+	renderTooltip2(props) {
+		return <Tooltip {...props}>Auto scrolling</Tooltip>;
+  }
+  
+
+  getFoldIcon() {
+    if (this.state.unfolded) {
+    return <i className="bi bi-fullscreen-exit"></i>
+    }
+
+    else {
+      return <i className="bi bi-fullscreen"></i>
+    }
+
+  }
+  getAutoScrollIcon() {
+    if (this.state.autoScroll) {
+    return <i className="bi bi-toggle-on"></i>
+    }
+
+    else {
+      return <i className="bi bi-toggle-off"></i>
+    }
+
+  }
+
+  toggleFold(event) {
+    event.preventDefault();
+    this.setState(
+      {unfolded: !this.state.unfolded}
+    )
+  }
+
 	render() {
 		console.log(this.state.subs.length);
 		if (this.state.subs.length == 0) {
@@ -142,33 +183,39 @@ class SubTitles extends React.Component<{}> {
 					<div className="subtitle-box card">
 						<ul id="handle" className="nav subtitle-nav text-white">
 							<li className="nav-item">
-								<a
-									className="btn text-white"
-									data-bs-toggle="collapse"
-									data-bs-target="#subtitle-container"
-									aria-expanded="false"
-									href="#"
+								<OverlayTrigger
+									placement="top"
+									delay={{ show: 250, hide: 400 }}
+									overlay={this.renderTooltip1}
 								>
-									折叠
-								</a>
+									<a
+										className="btn text-white"
+										data-bs-toggle="collapse"
+										data-bs-target="#subtitle-container"
+                    aria-expanded="false"
+                    onClick={(event) => this.toggleFold(event)}
+										href="#"
+									>
+									{this.getFoldIcon()}
+									</a>
+								</OverlayTrigger>
 							</li>
 
-							<div className="form-check form-switch">
-								<input
-									className="form-check-input"
-									type="checkbox"
-                  role="switch"
-                  checked={this.state.autoScroll}
-                  onChange={(e) => this.onAutoScrollToggle(e) }
-									id="flexSwitchCheckDefault"
-								/>
-								<label
-									className="form-check-label"
-									htmlFor="flexSwitchCheckDefault"
-								>
-									Auto scrolling
-								</label>
-							</div>
+							<li className="nav-item">
+									<OverlayTrigger
+										placement="top"
+										delay={{ show: 250, hide: 400 }}
+										overlay={this.renderTooltip2}
+									>
+									<a
+										className="btn text-white"
+                    onClick={(event) => this.onAutoScrollToggle(event)}
+										href="#"
+									>
+									{this.getAutoScrollIcon()}
+									</a>
+									</OverlayTrigger>
+							</li>
 						</ul>
 
 						<div
@@ -202,13 +249,14 @@ class SubTitles extends React.Component<{}> {
 					</div>
 				</Draggable>
 			);
-  }
+	}
 
-  onAutoScrollToggle(e: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({
-      autoScroll: e.target.checked
-    })
-  }
+	onAutoScrollToggle(event) {
+    event.preventDefault();
+		this.setState({
+			autoScroll: !this.state.autoScroll,
+		});
+	}
 }
 
 export default SubTitles;

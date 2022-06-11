@@ -12,6 +12,9 @@
     cursor: grab;
     background: transparent;
 }
+.subtitle-nav .btn {
+    font-size: 2rem;
+}
 .subtitle-container {
     height: 500px;
     overflow: auto;

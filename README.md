@@ -5,3 +5,4 @@
 - add next/pre sentence button
 - add stop and play button
 - reset the component when refresh
+- update the speed of video

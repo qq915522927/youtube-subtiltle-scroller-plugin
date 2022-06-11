@@ -7,7 +7,8 @@
       "https://*.youtube.com/*",
       "webRequest",
       "webRequestBlocking",
-      "tabs"
+      "tabs",
+      "runtime"
     ],
     "background": {
         "scripts": ["./dist/background.js"],
@@ -18,5 +19,9 @@
         "matches": ["https://*.youtube.com/*"],
         "js": ["./dist/foreground.js"]
       }
-    ]
+    ],
+    "web_accessible_resources": [
+      "dist/fonts/bootstrap-icons.woff",
+      "dist/fonts/bootstrap-icons.woff2"
+      ]
 }

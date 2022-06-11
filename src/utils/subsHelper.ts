@@ -14,6 +14,7 @@ export const subTextToChildNodesArray = (text: string): ChildNode[] => {
 }
 
 export const getCleanSubText = (text: string): string => {
+    if (!text) return '';
   const tmpDiv = document.createElement('div') as HTMLDivElement
   tmpDiv.innerHTML = text
     .replace(/<\d+:\d+:\d+.\d+><c>/g, '')

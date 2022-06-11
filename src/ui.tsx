@@ -5,6 +5,7 @@ import { subTitleType } from 'subtitle'
 import "./css/style.css"
 import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap"
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
 const e = React.createElement;
 
