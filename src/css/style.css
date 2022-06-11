@@ -29,3 +29,9 @@
 .higlight-row {
     background-color: rgba(0, 0, 0, 0.71);
 }
+
+img, svg {
+    /* unset this to reduce the affect on the youtue UI */
+    vertical-align: unset !important;
+}
+
